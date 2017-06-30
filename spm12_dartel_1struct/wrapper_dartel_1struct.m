@@ -11,7 +11,7 @@
 
 % INSTRUCTIONS:
 % Edit parameters at the top of the wrapper then run the wrapper. The wrapper will
-% call "run_dartel_MBW" so make sure that is in the same directory. This
+% call "run_dartel_1struct" so make sure that is in the same directory. This
 % will save a "runStatus" struct that will contain each subjects'
 % pre-Dartel status. It will also save the pre-Dartel workspace that will
 % be used for Dartel. 
@@ -20,20 +20,20 @@
 %% User-editable Parameters
 
 % Path/directory/name information
-owd = '/u/project/sanscn/kevmtan/scripts/SPM12_DARTEL/spm12_dartel_1struct/PTSD';  % base study directory
+owd = '/u/project/sanscn/kevmtan/scripts/SPM12_DARTEL/spm12_dartel_1struct/endo2';  % base study directory
 codeDir = '/u/project/sanscn/kevmtan/scripts/SPM12_DARTEL/spm12_dartel_1struct'; % where code lives
-output = '/u/project/sanscn/kevmtan/scripts/SPM12_DARTEL/spm12_dartel_1struct/PTSDbatch'; % dir in which to save scripts
-subID = 'VET*'; % pattern for finding subject folders (use wildcards)
+output = '/u/project/sanscn/kevmtan/scripts/SPM12_DARTEL/spm12_dartel_1struct/endo2batch'; % dir in which to save scripts
+subID = 'endo*'; % pattern for finding subject folders (use wildcards)
 runID = 'BOLD_*'; % pattern for finding functional run folders (use wildcards)
 funcID ='BOLD_'; % first character(s) in your functional images? (do NOT use wildcards)
-structID = 'SAG_MPRAGE*'; % pattern for finding structural folder (use wildcards)
+structID = 'MBW_*'; % pattern for finding structural folder (use wildcards)
 
 % Subjects to do/skip
 subNam = {}; % do which subjects? (leave empty to do all)
 skipSub = {};
 
 % 4d or 3d functional .nii?
-fourDnii = 0; % 1=4d, 0=3d
+fourDnii = 1; % 1=4d, 0=3d
 
 % Path of TPM tissues in your SPM directory
 tpmPath = '/u/project/CCN/apps/spm12/tpm';

@@ -30,9 +30,9 @@ funcID ='BOLD_'; % first character(s) in your functional images? (do NOT use wil
 mbwdirID = 'Matched_Bandwidth_HiRes*'; % pattern for finding matched-bandwidth folder (use wildcards)
 mpragedirID = 'SAG_MPRAGE*'; % pattern for finding mprage folder (use wildcards)
 
-% Subjects to do/skip
+% Subjects to do/skip, example: {'sub001' 'sub002'}
 subNam = {}; % do which subjects? (leave empty to do all)
-skipSub = {};
+skipSub = {}; % skip which subjects? (leave empty to do all)
 
 % 4d or 3d functional .nii?
 fourDnii = 0; % 1=4d, 0=3d

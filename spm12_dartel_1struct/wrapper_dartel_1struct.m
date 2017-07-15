@@ -28,9 +28,9 @@ runID = 'BOLD_*'; % pattern for finding functional run folders (use wildcards)
 funcID ='BOLD_'; % first character(s) in your functional images? (do NOT use wildcards)
 structID = 'MBW_*'; % pattern for finding structural folder (use wildcards)
 
-% Subjects to do/skip
+% Subjects to do/skip, example: {'sub001' 'sub002'}
 subNam = {}; % do which subjects? (leave empty to do all)
-skipSub = {};
+skipSub = {}; % skip which subjects? (leave empty to do all)
 
 % 4d or 3d functional .nii?
 fourDnii = 1; % 1=4d, 0=3d

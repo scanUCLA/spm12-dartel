@@ -1,5 +1,5 @@
 function [status, errorMsg, allfuncs, allt1, allrc1, allrc2, allu_rc1] =...
-    run_dartel_1struct(subNam, owd, codeDir, output, runID, funcID, mpragedirID,...
+    run_dartel_1struct(subNam, owd, codeDir, batchDir, runID, funcID, mpragedirID,...
     fourDnii, execPreDartel)
 
 %% Parameters
@@ -130,7 +130,7 @@ end
 %% Save matlabbatch
 try
     time_stamp = datestr(now, 'yyyymmdd_HHMM');
-    filename = [output '/preDARTEL_1struct_' subNam '_' time_stamp];
+    filename = [batchDir '/preDARTEL_1struct_' subNam '_' time_stamp];
     save(filename, 'matlabbatch');
 catch
     status = 0;

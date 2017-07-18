@@ -1,5 +1,5 @@
 function [status, errorMsg, allfuncs, allt1, allrc1, allrc2, allu_rc1] =...
-    run_dartel_mprageMBW(subNam, owd, codeDir, output, runID, funcID, mbwdirID,...
+    run_dartel_mprageMBW(subNam, owd, codeDir, batchDir, runID, funcID, mbwdirID,...
     mpragedirID, fourDnii, execPreDartel)
 
 %% Parameters
@@ -148,7 +148,7 @@ end
 %% Save matlabbatch
 try
     time_stamp = datestr(now, 'yyyymmdd_HHMM');
-    filename = [output '/preDARTEL_MBWmprage_' subNam '_' time_stamp];
+    filename = [batchDir '/preDARTEL_MBWmprage_' subNam '_' time_stamp];
     save(filename, 'matlabbatch');
 catch
     status = 0;

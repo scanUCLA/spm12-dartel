@@ -1,20 +1,8 @@
 %% SPM12 Dartel using one structural file (just MPRAGE or just MBW)
 % Created by Kevin Tan on Jun 29, 2017 (some code adopted from Bob Spunt)
 
-% DESCRIPTION:
-% 1) Functionals realigned to mean functional orientation
-% 2) Co-register structural with mean functional (saved in nifti header)
-% 3) Segment structural
-% 4) Create DARTEL templates
-% 5) Normalize functionals to MNI space via DARTEL
-% 6) Normalize structural to MNI space via DARTEL
-
-% INSTRUCTIONS:
-% Edit parameters at the top of the wrapper then run the wrapper. The wrapper will
-% call "run_dartel_1struct" so make sure that is in the same directory. This
-% will save a "runStatus" struct that will contain each subjects'
-% pre-Dartel status. It will also save the pre-Dartel workspace that will
-% be used for Dartel. 
+% Instructions, agorithmic description & edit history:
+%   https://github.com/scanUCLA/spm12-dartel
 
 
 %% User-editable Parameters
@@ -22,7 +10,7 @@
 % Path/directory/name information
 owd = '/u/project/sanscn/kevmtan/scripts/SPM12_DARTEL/spm12_dartel_1struct/endo2';  % base study directory
 codeDir = '/u/project/sanscn/kevmtan/scripts/SPM12_DARTEL/spm12_dartel_1struct'; % where code lives
-output = '/u/project/sanscn/kevmtan/scripts/SPM12_DARTEL/spm12_dartel_1struct/endo2batch'; % dir in which to save scripts
+batchDir = '/u/project/sanscn/kevmtan/scripts/SPM12_DARTEL/spm12_dartel_1struct/endo2batch'; % dir in which to save batch scripts & predartel subject status + workspace
 subID = 'endo*'; % pattern for finding subject folders (use wildcards)
 runID = 'BOLD_*'; % pattern for finding functional run folders (use wildcards)
 funcID ='BOLD_'; % first character(s) in your functional images? (do NOT use wildcards)
@@ -32,19 +20,19 @@ structID = 'MBW_*'; % pattern for finding structural folder (use wildcards)
 subNam = {}; % do which subjects? (leave empty to do all)
 skipSub = {}; % skip which subjects? (leave empty to do all)
 
-% 4d or 3d functional .nii?
+% 4d or 3d functional nifti files?
 fourDnii = 1; % 1=4d, 0=3d
 
 % Path of TPM tissues in your SPM directory
 tpmPath = '/u/project/CCN/apps/spm12/tpm';
 
 % Customizable preprocessing parameters
-vox_size=3;    % voxel size at which to re-sample functionals (isotropic)
-smooth_FWHM=8; % smoothing kernel (isotropic)
+voxSize = 3; % voxel size at which to re-sample functionals (mm isotropic)
+FWHM = 8; % smoothing kernel (mm isotropic)
 
 % Execute (1) or just make matlabbatches (0)
-execPreDartel = 1;
-execDartel = 1;
+execPreDartel = 0;
+execDartel = 0;
 
 %% Setup subjects
 
@@ -67,7 +55,7 @@ runStatus(numSubs).error = [];
 
 %% Run Pre-dartel (explicitly parallelized per subject)
 try
-    mkdir(output);
+    mkdir(batchDir);
 catch
 end
 
@@ -86,7 +74,7 @@ parfor i = 1:numSubs
         disp(['Running subject ' subNam{i}]);
         [runStatus(i).status, runStatus(i).error, a_allfuncs{i}, allt1{i},...
             allrc1{i}, allrc2{i}, allu_rc1{i}] = run_dartel_1struct(subNam{i},...
-            owd, codeDir, output, runID, funcID, structID, fourDnii, execPreDartel);
+            owd, codeDir, batchDir, runID, funcID, structID, fourDnii, execPreDartel);
         if runStatus(i).status == 1
             disp(['subject ' subNam{i} ' successful']);
         else
@@ -116,9 +104,9 @@ end
 
 % Save stuff
 date = datestr(now,'yyyymmdd_HHMM');
-filename = [output '/runStatus_' date '.mat'];
+filename = [batchDir '/runStatus_' date '.mat'];
 save(filename,'runStatus');
-filename = [output '/forDartel_workspace_' date '.mat']; % Use this to re-do "run dartel" if it fails
+filename = [batchDir '/forDartel_workspace_' date '.mat']; % Use this to re-do "run dartel" if it fails
 save(filename);
 
 %% Create DARTEL matlabbatch
@@ -228,7 +216,7 @@ matlabbatch{4}.spm.tools.dartel.mni_norm.fwhm = [0 0 0];
 
 % save matlabbatch struct in output folder
 time_stamp = datestr(now,'yyyymmdd_HHMM');
-filename = [output '/DARTEL_1struct_' time_stamp];
+filename = [batchDir '/DARTEL_1struct_' time_stamp];
 save(filename,'matlabbatch');                         
 
 % Execute matlabbatch

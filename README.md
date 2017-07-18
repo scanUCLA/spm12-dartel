@@ -7,7 +7,7 @@ Code for preprocessing of functional and structural MRI data into standardized M
 
 <b>Instructions:</b>
 
-Within each folder there is a <b>wrapper</b> script and a <b>run</b> function. All user-editable parameters are in an the epynomous section of the wrapper function. Other sections of the wrapper script and run function shouldn't be edited unless you know what you're doing.
+Within each folder there is a <b>wrapper</b> script and a <b>run</b> function. All user-editable parameters are in an the epynomous section of the wrapper. Other sections of the wrapper script and run function shouldn't be edited unless you know what you're doing. Call only the wrapper as the wrapper will call the run function in a parfor loop. A "runStatus" struct containg each subject's pre-dartel status will be saved in the folder specified in "batchDir". The matlab workspace after pre-dartel will also be saved in "batchDir", you can use this to re-run DARTEL without re-running pre-dartel. 
 
 <b>1struct algorithm:</b>
 1) Realign functionals to mean functional (pre-dartel; parfor parallelization)
@@ -25,4 +25,3 @@ Within each folder there is a <b>wrapper</b> script and a <b>run</b> function. A
 5) Create DARTEL templates
 6) Normalize functionals to MNI space via DARTEL
 7) Normalize MPRAGE to MNI space via DARTEL
-

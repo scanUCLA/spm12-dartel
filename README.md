@@ -15,7 +15,8 @@ Within each folder there is a <b>wrapper</b> script and a <b>run</b> function. A
 3) Segment structural (pre-dartel; implicitly parallaleized)
 4) Create DARTEL templates
 5) Normalize functionals to MNI space via DARTEL
-6) Normalize structural to MNI space via DARTEL
+6) Smooth functionals with FWHM kernel
+7) Normalize structural to MNI space via DARTEL
 
 <b>mprageMBW algorithm:</b>
 1) Realign functionals to mean functional (pre-dartel; parfor parallelization)
@@ -24,4 +25,5 @@ Within each folder there is a <b>wrapper</b> script and a <b>run</b> function. A
 4) Segment MPRAGE (pre-dartel; implicitly parallaleized)
 5) Create DARTEL templates
 6) Normalize functionals to MNI space via DARTEL
-7) Normalize MPRAGE to MNI space via DARTEL
+7) Smooth functionals with FWHM kernel
+8) Normalize MPRAGE to MNI space via DARTEL

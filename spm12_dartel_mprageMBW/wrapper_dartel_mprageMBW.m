@@ -39,6 +39,8 @@ execDartel = 0;
 
 %% Setup subjects
 
+diary([batchDir '/preDARTEL_log_' datestr(now,'yyyymmdd_HHMM') '.txt']);
+
 % Find subject directories
 if isempty(subNam)
     d = dir([owd '/' subID]);
@@ -111,8 +113,11 @@ filename = [batchDir '/runStatus_' date '.mat'];
 save(filename,'runStatus');
 filename = [batchDir '/forDartel_workspace_' date '.mat']; % Use this to re-do "run dartel" if it fails
 save(filename);
+diary off
 
 %% Create DARTEL matlabbatch
+
+diary([batchDir '/DARTEL_log_' datestr(now,'yyyymmdd_HHMM') '.txt']);
 
 spm('defaults','fmri'); spm_jobman('initcfg');
 
@@ -219,7 +224,7 @@ matlabbatch{4}.spm.tools.dartel.mni_norm.fwhm = [0 0 0];
 
 % save matlabbatch struct in output folder
 time_stamp = datestr(now,'yyyymmdd_HHMM');
-filename = [batchDir '/DARTEL_MBWmprage_' time_stamp];
+filename = [batchDir '/DARTEL_' time_stamp];
 save(filename,'matlabbatch');                         
 
 % Execute matlabbatch
@@ -227,3 +232,4 @@ if execDartel == 1
     spm_jobman('run',matlabbatch);
     disp(['DARTEL COMPLETED: ' datestr(now,'yyyymmdd_HHMM')]);
 end
+diary off

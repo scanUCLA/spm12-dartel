@@ -7,23 +7,25 @@ Code for preprocessing of functional and structural MRI data into standardized M
 
 <b>Instructions:</b>
 
-Within each folder there is a <b>wrapper</b> script and a <b>run</b> function. All user-editable parameters are in an the epynomous section of the wrapper. Other sections of the wrapper script and run function shouldn't be edited unless you know what you're doing. Call only the wrapper as the wrapper will call the run function in a parfor loop. A "runStatus" struct containg each subject's pre-dartel status will be saved in the folder specified in "batchDir". The matlab workspace after pre-dartel will also be saved in "batchDir", you can use this to re-run DARTEL without re-running pre-dartel. 
+Within each folder there is a <b>wrapper</b> script and a <b>run</b> function. All user-editable parameters are in an the epynomous section of the wrapper. Other sections of the wrapper script and run function shouldn't be edited unless you know what you're doing. Call only the wrapper as the wrapper will call the run function in a parfor loop.
+A "runStatus" struct containg each subject's pre-dartel status will be saved in the folder specified in "batchDir". The matlab workspace after pre-dartel will also be saved in "batchDir", you can use this to re-run DARTEL without re-running pre-dartel. 
+A text log of the matlab console output will be saved for predartel & dartel in the "batchDir" folder
 
 <b>1struct algorithm:</b>
 1) Realign functionals to mean functional (pre-dartel; parfor parallelization)
 2) Co-register structural to mean functional (pre-dartel; parfor parallelization)
-3) Segment structural (pre-dartel; implicitly parallaleized)
-4) Create DARTEL templates
+3) Segment & bias-correct structural, generate segment params for DARTEL  (pre-dartel; implicitly parallaleized)
+4) Create DARTEL templates & generate deformation fields for MNI normalization
 5) Normalize functionals to MNI space via DARTEL
-6) Smooth functionals with FWHM kernel
-7) Normalize structural to MNI space via DARTEL
+6) Smooth functionals with FWHM kernel via DARTEL
+7) Normalize bias-corrected structural to MNI space via DARTEL
 
 <b>mprageMBW algorithm:</b>
 1) Realign functionals to mean functional (pre-dartel; parfor parallelization)
 2) Co-register MBW to mean functional (pre-dartel; parfor parallelization)
 3) Co-register MPRAGE to MBW (pre-dartel; parfor parallelization)
-4) Segment MPRAGE (pre-dartel; implicitly parallaleized)
-5) Create DARTEL templates
+4) Segment & bias-correct structural, generate segment params for DARTEL  (pre-dartel; implicitly parallaleized)
+5) Create DARTEL templates & generate deformation fields for MNI normalization
 6) Normalize functionals to MNI space via DARTEL
-7) Smooth functionals with FWHM kernel
-8) Normalize MPRAGE to MNI space via DARTEL
+7) Smooth functionals with FWHM kernel via DARTEL
+8) Normalize bias-corrected MPRAGE to MNI space via DARTEL

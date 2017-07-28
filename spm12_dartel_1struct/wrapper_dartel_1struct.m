@@ -1,9 +1,10 @@
 %% SPM12 Dartel using one structural file (just MPRAGE or just MBW)
 % Created by Kevin Tan on Jun 29, 2017 (some code adopted from Bob Spunt)
 
-% Instructions, agorithmic description & edit history:
+% Instructions, agorithmic description & edit history (please read!!):
 %   https://github.com/scanUCLA/spm12-dartel
 
+% Last revision: 28 July 2017 - Kevin Tan
 %% User-editable Parameters
 
 % Path/directory/name information

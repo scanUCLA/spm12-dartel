@@ -1,4 +1,4 @@
-function [status, errorMsg, allfuncs, allt1, allrc1, allrc2, allu_rc1] =...
+function [status, errorMsg, allfuncs, allt1, allmt1, allrc1, allrc2, allu_rc1] =...
     run_dartel_1struct(subNam, owd, codeDir, batchDir, runID, funcID, mpragedirID,...
     fourDnii, execPreDartel)
 
@@ -12,6 +12,7 @@ status = NaN;
 errorMsg = '';
 allfuncs = [];
 allt1 = [];
+allmt1 = [];
 allrc1 = [];
 allrc2 = [];
 allu_rc1 = [];
@@ -70,9 +71,9 @@ try
     % get the images
     cd(mprdir); d = dir([mpragedirID '.nii']);
     mprage_name = d.name; clear d
-    t1vol = [mprdir filesep mprage_name];
-    fprintf('MPRAGE is: %s\n\n',t1vol)
-    [firstpart,lastpart] = strread(t1vol,'%s %s','delimiter','.');
+    allt1 = [mprdir filesep mprage_name];
+    fprintf('MPRAGE is: %s\n\n',allt1)
+    [firstpart,lastpart] = strread(allt1,'%s %s','delimiter','.');
     
     % for DARTEL
     if fourDnii == 1
@@ -80,7 +81,7 @@ try
     else
         allfuncs = allfiles_orig;
     end
-    allt1 = t1vol;
+    allmt1 = [mprdir filesep 'm' mprage_name];
     allrc1 = [mprdir filesep 'rc1' mprage_name(1:end-4) '.nii'];
     allrc2 = [mprdir filesep 'rc2' mprage_name(1:end-4) '.nii'];
     allu_rc1 = [mprdir filesep 'u_rc1' mprage_name(1:end-4) '_Template.nii'];
@@ -112,7 +113,7 @@ try
     % Co-register structural to mean functional
     % -------------------------------------------------
     matlabbatch{3}.spm.spatial.coreg.estimate.ref = mean_func;
-    matlabbatch{3}.spm.spatial.coreg.estimate.source = cellstr(t1vol);
+    matlabbatch{3}.spm.spatial.coreg.estimate.source = cellstr(allt1);
     matlabbatch{3}.spm.spatial.coreg.estimate.other{1} = '';
     matlabbatch{3}.spm.spatial.coreg.estimate.eoptions.cost_fun = 'nmi';
     matlabbatch{3}.spm.spatial.coreg.estimate.eoptions.sep = [4 2];

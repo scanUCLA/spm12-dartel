@@ -4,7 +4,6 @@
 % Instructions, agorithmic description & edit history:
 %   https://github.com/scanUCLA/spm12-dartel
 
-
 %% User-editable Parameters
 
 % Path/directory/name information
@@ -27,9 +26,12 @@ fourDnii = 1; % 1=4d, 0=3d
 % Path of TPM tissues in your SPM directory
 tpmPath = '/u/project/CCN/apps/spm12/tpm';
 
-% Customizable preprocessing parameters
-voxSize = 3; % voxel size at which to re-sample functionals (mm isotropic)
-FWHM = 8; % smoothing kernel (mm isotropic)
+% Voxel size for resampling (use AFNI's dicom_hdr on the functional & structural DICOM files and use the "slice thickness")
+fVoxSize = [3 3 3]; % functionals (non-multiband usually [3 3 3], multiband usually [2 2 2])
+sVoxSize = [1 1 1]; % MPRAGE usually [1 1 1]
+
+% smoothing kernel for functionals  (mm isotropic)
+FWHM = 8;
 
 % Execute (1) or just make matlabbatches (0)
 execPreDartel = 0;
@@ -73,7 +75,7 @@ parfor i = 1:numSubs
         continue
     else % Run subject
         disp(['Running subject ' subNam{i}]);
-        [runStatus(i).status, runStatus(i).error, a_allfuncs{i}, allt1{i},...
+        [runStatus(i).status, runStatus(i).error, a_allfuncs{i}, allt1{i}, allmt1{i},...
             allrc1{i}, allrc2{i}, allu_rc1{i}] = run_dartel_mprageMBW(subNam{i},...
             owd, codeDir, batchDir, runID, funcID, mbwdirID, mpragedirID, fourDnii, execPreDartel);
         if runStatus(i).status == 1
@@ -197,19 +199,19 @@ for s = 1:length(inds)
     matlabbatch{3}.spm.tools.dartel.mni_norm.data.subj(s).flowfield{1} = allu_rc1{inds(s)};
     matlabbatch{3}.spm.tools.dartel.mni_norm.data.subj(s).images = allfuncs{inds(s)};
 end                                             
-matlabbatch{3}.spm.tools.dartel.mni_norm.vox = [vox_size vox_size vox_size];
-matlabbatch{3}.spm.tools.dartel.mni_norm.bb = [-78 -112 -50; 78 76 85];
+matlabbatch{3}.spm.tools.dartel.mni_norm.vox = fVoxSize;
+matlabbatch{3}.spm.tools.dartel.mni_norm.bb = [NaN NaN NaN; NaN NaN NaN];
 matlabbatch{3}.spm.tools.dartel.mni_norm.preserve = 0;
-matlabbatch{3}.spm.tools.dartel.mni_norm.fwhm = [smooth_FWHM smooth_FWHM smooth_FWHM];
+matlabbatch{3}.spm.tools.dartel.mni_norm.fwhm = [FWHM FWHM FWHM];
 
-% DARTEL: normalize MPRAGE to MNI
+% DARTEL: normalize bias-corrected MPRAGE to MNI
 matlabbatch{4}.spm.tools.dartel.mni_norm.template(1) = cfg_dep('Run Dartel (create Templates): Template (Iteration 6)', substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','template', '()',{7}));
 for s = 1:length(inds)
     matlabbatch{4}.spm.tools.dartel.mni_norm.data.subj(s).flowfield{1} = allu_rc1{inds(s)};
-    matlabbatch{4}.spm.tools.dartel.mni_norm.data.subj(s).images{1} = allt1{inds(s)};
+    matlabbatch{4}.spm.tools.dartel.mni_norm.data.subj(s).images{1} = allmt1{inds(s)};
 end                                            
-matlabbatch{4}.spm.tools.dartel.mni_norm.vox = [1 1 1];
-matlabbatch{4}.spm.tools.dartel.mni_norm.bb = [-78 -112 -50; 78 76 85];
+matlabbatch{4}.spm.tools.dartel.mni_norm.vox = sVoxSize;
+matlabbatch{4}.spm.tools.dartel.mni_norm.bb = [NaN NaN NaN; NaN NaN NaN];
 matlabbatch{4}.spm.tools.dartel.mni_norm.preserve = 0;
 matlabbatch{4}.spm.tools.dartel.mni_norm.fwhm = [0 0 0];
 
@@ -223,5 +225,5 @@ save(filename,'matlabbatch');
 % Execute matlabbatch
 if execDartel == 1
     spm_jobman('run',matlabbatch);
-    disp('DARTEL COMPLETED');
+    disp(['DARTEL COMPLETED: ' datestr(now,'yyyymmdd_HHMM')]);
 end

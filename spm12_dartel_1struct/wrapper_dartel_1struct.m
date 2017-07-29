@@ -39,6 +39,12 @@ execDartel = 1;
 
 %% Setup subjects
 
+% Make batch folder
+try
+    mkdir(batchDir);
+catch
+end
+
 diary([batchDir '/preDARTEL_log_' datestr(now,'yyyymmdd_HHMM') '.txt']);
 
 % Find subject directories
@@ -59,10 +65,6 @@ runStatus(numSubs).status = [];
 runStatus(numSubs).error = [];
 
 %% Run Pre-dartel (explicitly parallelized per subject)
-try
-    mkdir(batchDir);
-catch
-end
 
 pool = parpool('local', numSubs);
 parfor i = 1:numSubs
@@ -78,8 +80,9 @@ parfor i = 1:numSubs
     else % Run subject
         disp(['Running subject ' subNam{i}]);
         [runStatus(i).status, runStatus(i).error, a_allfuncs{i}, allt1{i}, allmt1{i},...
-            allrc1{i}, allrc2{i}, allu_rc1{i}] = run_dartel_1struct(subNam{i},...
-            owd, codeDir, batchDir, runID, funcID, structID, fourDnii, execPreDartel);
+            allrc1{i}, allrc2{i}, allu_rc1{i}, allc1{i}, allc2{i}, allc3{i}] =...
+            run_dartel_1struct(subNam{i}, owd, codeDir, batchDir, runID, funcID,...
+            structID, fourDnii, execPreDartel);
         if runStatus(i).status == 1
             disp(['subject ' subNam{i} ' successful']);
         else
@@ -219,6 +222,39 @@ matlabbatch{4}.spm.tools.dartel.mni_norm.vox = sVoxSize;
 matlabbatch{4}.spm.tools.dartel.mni_norm.bb = [NaN NaN NaN; NaN NaN NaN];
 matlabbatch{4}.spm.tools.dartel.mni_norm.preserve = 0;
 matlabbatch{4}.spm.tools.dartel.mni_norm.fwhm = [0 0 0];
+
+% DARTEL: normalize grey matter segmentation to MNI (for Conn toolbox or other use of segmentations)
+matlabbatch{5}.spm.tools.dartel.mni_norm.template(1) = cfg_dep('Run Dartel (create Templates): Template (Iteration 6)', substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','template', '()',{7}));
+for s = 1:length(inds)
+    matlabbatch{5}.spm.tools.dartel.mni_norm.data.subj(s).flowfield{1} = allu_rc1{inds(s)};
+    matlabbatch{5}.spm.tools.dartel.mni_norm.data.subj(s).images{1} = allc1{inds(s)};
+end                                            
+matlabbatch{5}.spm.tools.dartel.mni_norm.vox = sVoxSize;
+matlabbatch{5}.spm.tools.dartel.mni_norm.bb = [NaN NaN NaN; NaN NaN NaN];
+matlabbatch{5}.spm.tools.dartel.mni_norm.preserve = 0;
+matlabbatch{5}.spm.tools.dartel.mni_norm.fwhm = [0 0 0];
+
+% DARTEL: normalize white matter segmentation to MNI (for Conn toolbox or other use of segmentations)
+matlabbatch{6}.spm.tools.dartel.mni_norm.template(1) = cfg_dep('Run Dartel (create Templates): Template (Iteration 6)', substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','template', '()',{7}));
+for s = 1:length(inds)
+    matlabbatch{6}.spm.tools.dartel.mni_norm.data.subj(s).flowfield{1} = allu_rc1{inds(s)};
+    matlabbatch{6}.spm.tools.dartel.mni_norm.data.subj(s).images{1} = allc2{inds(s)};
+end                                            
+matlabbatch{6}.spm.tools.dartel.mni_norm.vox = sVoxSize;
+matlabbatch{6}.spm.tools.dartel.mni_norm.bb = [NaN NaN NaN; NaN NaN NaN];
+matlabbatch{6}.spm.tools.dartel.mni_norm.preserve = 0;
+matlabbatch{6}.spm.tools.dartel.mni_norm.fwhm = [0 0 0];
+
+% DARTEL: normalize CSF segmentation to MNI (for Conn toolbox or other use of segmentations)
+matlabbatch{7}.spm.tools.dartel.mni_norm.template(1) = cfg_dep('Run Dartel (create Templates): Template (Iteration 6)', substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','template', '()',{7}));
+for s = 1:length(inds)
+    matlabbatch{7}.spm.tools.dartel.mni_norm.data.subj(s).flowfield{1} = allu_rc1{inds(s)};
+    matlabbatch{7}.spm.tools.dartel.mni_norm.data.subj(s).images{1} = allc3{inds(s)};
+end                                            
+matlabbatch{7}.spm.tools.dartel.mni_norm.vox = sVoxSize;
+matlabbatch{7}.spm.tools.dartel.mni_norm.bb = [NaN NaN NaN; NaN NaN NaN];
+matlabbatch{7}.spm.tools.dartel.mni_norm.preserve = 0;
+matlabbatch{7}.spm.tools.dartel.mni_norm.fwhm = [0 0 0];
 
 %% Save & run DARTEL matlabbatch
 

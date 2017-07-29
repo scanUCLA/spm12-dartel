@@ -17,8 +17,11 @@ A text log of the matlab console output will be saved for predartel & dartel in 
 3) Segment & bias-correct structural, generate segment params for DARTEL  (pre-dartel; implicitly parallaleized)
 4) Create DARTEL templates & generate deformation fields for MNI normalization
 5) Normalize functionals to MNI space via DARTEL
-6) Smooth functionals with FWHM kernel via DARTEL
+6) Smooth functionals with FWHM kernel via DARTEL (implicit parallelization from here)
 7) Normalize bias-corrected structural to MNI space via DARTEL
+8) Normalize grey matter (C1) segmentation to MNI space via DARTEL
+9) Normalize white matter (C2) segmentation to MNI space via DARTEL
+10) Normalize CSF (C3) segmentation to MNI space via DARTEL
 
 <b>mprageMBW algorithm:</b>
 1) Realign functionals to mean functional (pre-dartel; parfor parallelization)
@@ -26,6 +29,9 @@ A text log of the matlab console output will be saved for predartel & dartel in 
 3) Co-register MPRAGE to MBW (pre-dartel; parfor parallelization)
 4) Segment & bias-correct structural, generate segment params for DARTEL  (pre-dartel; implicitly parallaleized)
 5) Create DARTEL templates & generate deformation fields for MNI normalization
-6) Normalize functionals to MNI space via DARTEL
+6) Normalize functionals to MNI space via DARTEL (implicit parallelization from here)
 7) Smooth functionals with FWHM kernel via DARTEL
 8) Normalize bias-corrected MPRAGE to MNI space via DARTEL
+9) Normalize grey matter (C1) segmentation to MNI space via DARTEL
+10) Normalize white matter (C2) segmentation to MNI space via DARTEL
+11) Normalize CSF (C3) segmentation to MNI space via DARTEL

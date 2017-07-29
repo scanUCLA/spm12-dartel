@@ -1,4 +1,4 @@
-function [status, errorMsg, allfuncs, allt1, allmt1, allrc1, allrc2, allu_rc1] =...
+function [status, errorMsg, allfuncs, allt1, allmt1, allrc1, allrc2, allu_rc1, allc1, allc2, allc3] =...
     run_dartel_mprageMBW(subNam, owd, codeDir, batchDir, runID, funcID, mbwdirID,...
     mpragedirID, fourDnii, execPreDartel)
 
@@ -94,6 +94,9 @@ try
     allrc1 = [mprdir filesep 'rc1' mprage_name(1:end-4) '.nii'];
     allrc2 = [mprdir filesep 'rc2' mprage_name(1:end-4) '.nii'];
     allu_rc1 = [mprdir filesep 'u_rc1' mprage_name(1:end-4) '_Template.nii'];
+    allc1 = [mprdir filesep 'c1' mprage_name];
+    allc2 = [mprdir filesep 'c2' mprage_name];
+    allc3 = [mprdir filesep 'c3' mprage_name];
     
     % =====================================
     % Begin building MATLABBATCH

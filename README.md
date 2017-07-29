@@ -11,6 +11,14 @@ Within each folder there is a <b>wrapper</b> script and a <b>run</b> function. A
 A "runStatus" struct containg each subject's pre-dartel status will be saved in the folder specified in "batchDir". The matlab workspace after pre-dartel will also be saved in "batchDir", you can use this to re-run DARTEL without re-running pre-dartel. 
 A text log of the matlab console output will be saved for predartel & dartel in the "batchDir" folder
 
+Final image ouputs for further analyses:
+* swBOLD[run name].nii = smoothed and warped-to-MNI BOLD images
+* rp_BOLD[run name].nii = motion parameters to include in level1 model as nuisance regressors
+* wm[MPRAGE/structural name].nii = bias-corrected warped-to-MNI structural image
+* wc1[MPRAGE/structural name].nii = warped-to-MNI grey matter segmentation image (can be used as mask/ROI; signal from which typically used for functional connectivity analyses, etc)
+* wc1[MPRAGE/structural name].nii = warped-to-MNI white matter segmentation image (can be used as mask/ROI; signal from which typically regressed out during functional connectivity analyses, etc)
+* wc1[MPRAGE/structural name].nii = warped-to-MNI cerebrospinal fluid (also eyes/sinuses maybe) segmentation image (can be used as mask/ROI; signal from which typically regressed out during functional connectivity analyses, etc)
+
 <b>1struct algorithm:</b>
 1) Realign functionals to mean functional (pre-dartel; parfor parallelization)
 2) Co-register structural to mean functional (pre-dartel; parfor parallelization)

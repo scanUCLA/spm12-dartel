@@ -2,7 +2,7 @@ function [status, errorMsg, allfuncs, allt1, allmt1, allrc1, allrc2, allu_rc1, a
     run_dartel_mprageMBW(subNam, owd, codeDir, batchDir, runID, funcID, mbwdirID,...
     mpragedirID, fourDnii, execPreDartel)
 
-% Last revision: 28 July 2017 - Kevin Tan
+% Last revision: 29 July 2017 - Kevin Tan
 %% Parameters
 funcFormat=2;       % format of your raw functional images (1=img/hdr, 2=4D nii)
 

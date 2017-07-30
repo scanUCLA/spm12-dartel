@@ -4,7 +4,7 @@
 % Instructions, agorithmic description & edit history (please read!!):
 %   https://github.com/scanUCLA/spm12-dartel
 
-% Last revision: 28 July 2017 - Kevin Tan
+% Last revision: 29 July 2017 - Kevin Tan
 %% User-editable Parameters
 
 % Path/directory/name information
@@ -66,7 +66,11 @@ runStatus(numSubs).error = [];
 
 %% Run Pre-dartel (explicitly parallelized per subject)
 
-pool = parpool('local', numSubs);
+% Determine number of parallel workers
+myCluster = parcluster('local');
+nWorkers = min(numSubs, myCluster.NumWorkers);
+
+pool = parpool('local', nWorkers);
 parfor i = 1:numSubs
     % Pre-allocate subject in runStatus struct
     runStatus(i).subNam = subNam{i};
@@ -122,6 +126,10 @@ diary off
 
 diary([batchDir '/DARTEL_log_' datestr(now,'yyyymmdd_HHMM') '.txt']);
 
+% Set max threads for implicit multithreading
+lastNumThreads = maxNumCompThreads(myCluster.NumWorkers);
+
+% Load SPM
 spm('defaults','fmri'); spm_jobman('initcfg');
 
 % Subjects with no errors in pre-dartel

@@ -12,7 +12,7 @@ A "runStatus" struct containg each subject's pre-dartel status will be saved in 
 A text log of the matlab console output will be saved for predartel & dartel in the "batchDir" folder
 
 Final image ouputs for further analyses:
-* swBOLD[run name].nii = smoothed and warped-to-MNI BOLD images
+* swrBOLD[run name].nii = resliced, warped-to-MNI & smoothed BOLD images
 * rp_BOLD[run name].nii = motion parameters to include in level1 model as nuisance regressors
 * wm[MPRAGE/structural name].nii = bias-corrected warped-to-MNI structural image
 * wc1[MPRAGE/structural name].nii = warped-to-MNI grey matter segmentation image (can be used as mask/ROI; signal from which typically used for functional connectivity analyses, etc)
@@ -20,7 +20,7 @@ Final image ouputs for further analyses:
 * wc1[MPRAGE/structural name].nii = warped-to-MNI cerebrospinal fluid (also eyes/sinuses maybe) segmentation image (can be used as mask/ROI; signal from which typically regressed out during functional connectivity analyses, etc)
 
 <b>1struct algorithm:</b>
-1) Realign functionals to mean functional (pre-dartel; parfor parallelization)
+1) Realign & reslice functionals to mean functional (pre-dartel; parfor parallelization)
 2) Co-register structural to mean functional (pre-dartel; parfor parallelization)
 3) Segment & bias-correct structural, generate segment params for DARTEL  (pre-dartel; implicitly parallaleized)
 4) Create DARTEL templates & generate deformation fields for MNI normalization
@@ -32,7 +32,7 @@ Final image ouputs for further analyses:
 10) Normalize CSF (C3) segmentation to MNI space via DARTEL
 
 <b>mprageMBW algorithm:</b>
-1) Realign functionals to mean functional (pre-dartel; parfor parallelization)
+1) Realign & reslice functionals to mean functional (pre-dartel; parfor parallelization)
 2) Co-register MBW to mean functional (pre-dartel; parfor parallelization)
 3) Co-register MPRAGE to MBW (pre-dartel; parfor parallelization)
 4) Segment & bias-correct structural, generate segment params for DARTEL  (pre-dartel; implicitly parallaleized)

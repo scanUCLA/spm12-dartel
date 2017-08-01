@@ -4,13 +4,13 @@
 % Instructions, agorithmic description & edit history (please read!!):
 %   https://github.com/scanUCLA/spm12-dartel
 
-% Last revision: 29 July 2017 - Kevin Tan
+% Last revision: 31 July 2017 - Kevin Tan
 %% User-editable Parameters
 
 % Path/directory/name information
 owd = '/u/project/sanscn/kevmtan/scripts/SPM12_DARTEL/spm12_dartel_1struct/endo2';  % base study directory
 codeDir = '/u/project/sanscn/kevmtan/scripts/SPM12_DARTEL/spm12_dartel_1struct'; % where code lives
-batchDir = '/u/project/sanscn/kevmtan/scripts/SPM12_DARTEL/spm12_dartel_1struct/endo2batch170728'; % dir in which to save batch scripts & predartel subject status + workspace
+batchDir = '/u/project/sanscn/kevmtan/scripts/SPM12_DARTEL/spm12_dartel_1struct/endo2batch170731'; % dir in which to save batch scripts & predartel subject status + workspace
 subID = 'endo*'; % pattern for finding subject folders (use wildcards)
 runID = 'BOLD_*'; % pattern for finding functional run folders (use wildcards)
 funcID ='BOLD_'; % first character(s) in your functional images? (do NOT use wildcards)
@@ -20,8 +20,8 @@ structID = 'MBW_*'; % pattern for finding structural folder (use wildcards)
 subNam = {}; % do which subjects? (leave empty to do all)
 skipSub = {}; % skip which subjects? (leave empty to do all)
 
-% 4d or 3d functional nifti files?
-fourDnii = 1; % 1=4d, 0=3d
+% 4d or 3d functional nifti files (e.g. BOLD runs all in one .nii or multiple .niis?)
+fourDnii = 0; % 1=4d, 0=3d
 
 % Path of TPM tissues in your SPM directory
 tpmPath = '/u/project/CCN/apps/spm12/tpm';
@@ -34,8 +34,8 @@ sVoxSize = [3 3 3]; % MPRAGE usually [1 1 1], MBW usually [1 1 3] or [3 3 3]
 FWHM = 8;
 
 % Execute (1) or just make matlabbatches (0)
-execPreDartel = 1;
-execDartel = 1;
+execPreDartel = 0;
+execDartel = 0;
 
 %% Setup subjects
 
@@ -83,7 +83,7 @@ parfor i = 1:numSubs
         continue
     else % Run subject
         disp(['Running subject ' subNam{i}]);
-        [runStatus(i).status, runStatus(i).error, a_allfuncs{i}, allt1{i}, allmt1{i},...
+        [runStatus(i).status, runStatus(i).error, allfuncs{i}, allt1{i}, allmt1{i},...
             allrc1{i}, allrc2{i}, allu_rc1{i}, allc1{i}, allc2{i}, allc3{i}] =...
             run_dartel_1struct(subNam{i}, owd, codeDir, batchDir, runID, funcID,...
             structID, fourDnii, execPreDartel);
@@ -97,22 +97,22 @@ parfor i = 1:numSubs
 end
 delete(pool);
 
-% Get rid of image frame specification for func images (SPM idiosyncrasy)
-if fourDnii == 1
-    for ia = 1:length(a_allfuncs)
-        for ib = 1:length(a_allfuncs{ia})
-            chars = length(a_allfuncs{ia}{ib}{1})-2;
-            allfuncs{ia}{ib,1} = a_allfuncs{ia}{ib}{1}(1:chars);
-        end
-    end
-else
-    for ia = 1:length(a_allfuncs)
-        for ib = 1:length(a_allfuncs{ia})
-            chars = length(a_allfuncs{ia}{ib})-2;
-            allfuncs{ia}{ib,1} = a_allfuncs{ia}{ib}(1:chars);
-        end
-    end
-end
+% % Get rid of image frame specification for func images (SPM idiosyncrasy)
+% if fourDnii == 1
+%     for ia = 1:length(a_allfuncs)
+%         for ib = 1:length(a_allfuncs{ia})
+%             chars = length(a_allfuncs{ia}{ib}{1})-2;
+%             allfuncs{ia}{ib,1} = a_allfuncs{ia}{ib}{1}(1:chars);
+%         end
+%     end
+% else
+%     for ia = 1:length(a_allfuncs)
+%         for ib = 1:length(a_allfuncs{ia})
+%             chars = length(a_allfuncs{ia}{ib})-2;
+%             allfuncs{ia}{ib,1} = a_allfuncs{ia}{ib}(1:chars);
+%         end
+%     end
+% end
 
 % Save stuff
 date = datestr(now,'yyyymmdd_HHMM');

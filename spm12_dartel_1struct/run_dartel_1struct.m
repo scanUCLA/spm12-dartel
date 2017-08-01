@@ -2,7 +2,7 @@ function [status, errorMsg, allfuncs, allt1, allmt1, allrc1, allrc2, allu_rc1, a
     run_dartel_1struct(subNam, owd, codeDir, batchDir, runID, funcID, mpragedirID,...
     fourDnii, execPreDartel)
 
-% Last revision: 29 July 2017 - Kevin Tan
+% Last revision: 31 July 2017 - Kevin Tan
 %% Parameters
 funcFormat=2;       % format of your raw functional images (1=img/hdr, 2=4D nii)
 
@@ -17,71 +17,49 @@ allmt1 = [];
 allrc1 = [];
 allrc2 = [];
 allu_rc1 = [];
+allc1 = [];
+allc2 = [];
+allc3 = [];
 
 try
-    cd(owd)
-    swd = sprintf('%s/%s',owd,subNam);
-    fprintf('Subject directory is %s\n',swd)
-    cd(swd)
-    cd raw
-    base_dir = pwd;
-    
     % Find run directories
-    d=dir(runID);
-    run_names = {d.name};
-    numruns=length(run_names);
-    fprintf('Found %d runs\n',numruns)
+    d = dir([owd '/' subNam '/raw/' runID]);
+    nRuns = length(d);
+    fprintf('Found %d runs\n', nRuns)
+    tmpStr = sprintf('^%s.*\\.nii$', funcID);
     
-    % Find functional images for run(s)
-    %-----------------------------------------------------------------%
-    load_dir = {};
-    raw_func_filenames = {};
-    allfiles_orig = {};
-    allfiles_norm = {};
-    for i = 1:numruns
-        load_dir{i} = fullfile(base_dir,run_names{i});
-        if funcFormat==1
-            tmpString=sprintf('^%s.*\\.img$',funcID);
-            [raw_func_filenames{i},dirs] = spm_select('List',load_dir{i},tmpString, inf);
-            filenames_orig{i}=cellstr(strcat(load_dir{i},filesep,raw_func_filenames{i}));
-            filenames_norm{i}=cellstr(strcat(load_dir{i},filesep,'w',raw_func_filenames{i}));
-            allfiles_orig = [allfiles_orig; filenames_orig{i}];
+    % Fund functional images per run
+    volsFPr = {};
+    for r = 1:nRuns
+        vols = {};
+        volsr = {};
+        [vols, ~] = spm_select('ExtList', [d(r).folder '/' d(r).name], tmpStr, Inf);
+        vols = cellstr(strcat(vols));
+        for v = 1:length(vols)
+            chars = length(vols{v})-2;
+            volsFP{r}{v,1} = [d(r).folder '/' d(r).name '/' vols{v}];
+            volsr{v,1} = [d(r).folder '/' d(r).name '/r' vols{v}(1:chars)];
+        end
+        % Realigned images
+        if fourDnii
+            volsFPr = [volsFPr;volsr{1}];
         else
-            tmpString=sprintf('^%s.*\\.nii$',funcID);
-            [raw_func_filenames{i},dirs] = spm_select('ExtFPList',load_dir{i},tmpString, inf);
-            filenames_orig{i}=cellstr(strcat(raw_func_filenames{i}));
-            filenames_norm{i}=cellstr(strcat('w',raw_func_filenames{i}));
-            allfiles_orig = [allfiles_orig; filenames_orig{i}];
+            volsFPr = [volsFPr;volsr];
         end
     end
-    if funcFormat==1
-        mean_func=cellstr(strcat(load_dir{1},filesep,'mean',raw_func_filenames{1}(1,:)));
-    else
-        [path name ext] = fileparts(allfiles_orig{1});
-        mean_func=cellstr(strcat(path,filesep,'mean',name,'.nii'));
-    end
-    load_dir = fullfile(base_dir,run_names{i});
-    
-    % Find the anatomicals
-    % -------------------------------------------------
     
     % find the mprage folder
-    d=dir(mpragedirID);
-    mprdir = [base_dir filesep d(1).name];
+    d = dir([owd '/' subNam '/raw/' mpragedirID]);
+    mprdir = [d(1).folder filesep d(1).name];
     
-    % get the images
-    cd(mprdir); d = dir([mpragedirID '.nii']);
+    % get the structural images
+    d = dir([mprdir '/' mpragedirID '.nii']);
     mprage_name = d.name; clear d
     allt1 = [mprdir filesep mprage_name];
     fprintf('MPRAGE is: %s\n\n',allt1)
-    [firstpart,lastpart] = strread(allt1,'%s %s','delimiter','.');
     
     % for DARTEL
-    if fourDnii == 1
-        allfuncs = filenames_orig;
-    else
-        allfuncs = allfiles_orig;
-    end
+    allfuncs = volsFPr;
     allmt1 = [mprdir filesep 'm' mprage_name];
     allrc1 = [mprdir filesep 'rc1' mprage_name(1:end-4) '.nii'];
     allrc2 = [mprdir filesep 'rc2' mprage_name(1:end-4) '.nii'];
@@ -94,21 +72,21 @@ try
     % Begin building MATLABBATCH
     % =====================================
     
-    matlabbatch{1}.cfg_basicio.cfg_cd.dir = cellstr(strcat(swd,filesep,'notes'));
+    matlabbatch{1}.cfg_basicio.cfg_cd.dir = cellstr(strcat([owd '/' subNam],filesep,'notes'));
     
     % Realignment of functionals
     % -------------------------------------------------
-    for i = 1:numruns
-        matlabbatch{2}.spm.spatial.realign.estwrite.data{i} = filenames_orig{i};
+    for i = 1:nRuns
+        matlabbatch{2}.spm.spatial.realign.estwrite.data{i} = volsFP{i};
     end
     matlabbatch{2}.spm.spatial.realign.estwrite.eoptions.quality = 0.9;         % higher quality
     matlabbatch{2}.spm.spatial.realign.estwrite.eoptions.sep = 4;               % default is 4
     matlabbatch{2}.spm.spatial.realign.estwrite.eoptions.fwhm = 5;              % default
-    matlabbatch{2}.spm.spatial.realign.estwrite.eoptions.rtm = 1;               % changed from 0 (=realign to first) to 1 (realign to mean) for
+    matlabbatch{2}.spm.spatial.realign.estwrite.eoptions.rtm = 0;               % 0=realign to first, to 1=realign to mean for
     matlabbatch{2}.spm.spatial.realign.estwrite.eoptions.interp = 4;            % default
     matlabbatch{2}.spm.spatial.realign.estwrite.eoptions.wrap = [0 0 0];        % default
     matlabbatch{2}.spm.spatial.realign.estwrite.eoptions.weight = {};           % don't weight
-    matlabbatch{2}.spm.spatial.realign.estwrite.roptions.which  = [0 1];        % create mean image only when reslicing
+    matlabbatch{2}.spm.spatial.realign.estwrite.roptions.which  = [2 1];        % reslice all and mean
     matlabbatch{2}.spm.spatial.realign.estwrite.roptions.interp = 4;            % default
     matlabbatch{2}.spm.spatial.realign.estwrite.roptions.wrap   = [0 0 0];      % no wrap (default)
     matlabbatch{2}.spm.spatial.realign.estwrite.roptions.mask   = 1;            % enable masking (default)
@@ -116,7 +94,7 @@ try
     
     % Co-register structural to mean functional
     % -------------------------------------------------
-    matlabbatch{3}.spm.spatial.coreg.estimate.ref = mean_func;
+    matlabbatch{3}.spm.spatial.coreg.estimate.ref(1) = cfg_dep('Realign: Estimate & Reslice: Mean Image', substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','rmean'));
     matlabbatch{3}.spm.spatial.coreg.estimate.source = cellstr(allt1);
     matlabbatch{3}.spm.spatial.coreg.estimate.other{1} = '';
     matlabbatch{3}.spm.spatial.coreg.estimate.eoptions.cost_fun = 'nmi';

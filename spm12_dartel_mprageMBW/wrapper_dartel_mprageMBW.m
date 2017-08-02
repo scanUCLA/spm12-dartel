@@ -4,14 +4,14 @@
 % Instructions, agorithmic description & edit history (please read!!):
 %   https://github.com/scanUCLA/spm12-dartel
 
-% Last revision: 31 July 2017 - Kevin Tan
+% Last revision: 2 Aug 2017 - Kevin Tan
 %% User-editable Parameters
 
 % Path/directory/name information
-owd = '/u/project/sanscn/kevmtan/scripts/SPM12_DARTEL/spm12_dartel_mprageMBW/PTSD';  % base study directory
-codeDir = '/u/project/sanscn/kevmtan/scripts/SPM12_DARTEL/spm12_dartel_mprageMBW'; % where code lives
-batchDir = '/u/project/sanscn/kevmtan/scripts/SPM12_DARTEL/spm12_dartel_mprageMBW/PTSDbatch_1707231'; % dir in which to save batch scripts & predartel subject status + workspace
-subID = 'VET*'; % pattern for finding subject folders (use wildcards)
+owd = '/data/gratitude_mprage/data';  % base study directory
+codeDir = '/data/gratitude_mprage/preproc'; % where code lives
+batchDir = '/data/gratitude_mprage/preproc/batches'; % dir in which to save batch scripts & predartel subject status + workspace
+subID = 'grat*'; % pattern for finding subject folders (use wildcards)
 runID = 'BOLD_*'; % pattern for finding functional run folders (use wildcards)
 funcID ='BOLD_'; % first character(s) in your functional images? (do NOT use wildcards)
 mbwdirID = 'Matched_Bandwidth_HiRes*'; % pattern for finding matched-bandwidth folder (use wildcards)
@@ -25,7 +25,7 @@ skipSub = {}; % skip which subjects? (leave empty to do all)
 fourDnii = 1; % 1=4d, 0=3d
 
 % Path of TPM tissues in your SPM directory
-tpmPath = '/u/project/CCN/apps/spm12/tpm';
+tpmPath = '/home/kevin/Documents/MATLAB/spm12/tpm';
 
 % Voxel size for resampling (use AFNI's dicom_hdr on the functional & structural DICOM files and use the "slice thickness")
 fVoxSize = [3 3 3]; % functionals (non-multiband usually [3 3 3], multiband usually [2 2 2])
@@ -35,8 +35,11 @@ sVoxSize = [1 1 1]; % MPRAGE usually [1 1 1]
 FWHM = 8;
 
 % Execute (1) or just make matlabbatches (0)
-execPreDartel = 0;
-execDartel = 0;
+execPreDartel = 1;
+execDartel = 1;
+
+% Number of workers (threads) matlab should use
+nWorkers = 15; %maxNumCompThreads
 
 %% Setup subjects
 
@@ -68,10 +71,7 @@ runStatus(numSubs).error = [];
 %% Run Pre-dartel (explicitly parallelized per subject)
 
 % Determine number of parallel workers
-myCluster = parcluster('local');
-nWorkers = min(numSubs, myCluster.NumWorkers);
-pool = parpool('local', nWorkers);
-
+parpool('local', nWorkers);
 parfor i = 1:numSubs
     % Pre-allocate subject in runStatus struct
     runStatus(i).subNam = subNam{i};
@@ -96,7 +96,7 @@ parfor i = 1:numSubs
         end
     end
 end
-delete(pool);
+delete(gcp('nocreate'));
 
 % % Get rid of image frame specification for func images (SPM idiosyncrasy)
 % if fourDnii == 1
@@ -127,11 +127,11 @@ diary off
 
 diary([batchDir '/DARTEL_log_' datestr(now,'yyyymmdd_HHMM') '.txt']);
 
-% Set max threads for implicit multithreading
-lastNumThreads = maxNumCompThreads(myCluster.NumWorkers);
-
 % Load SPM
 spm('defaults','fmri'); spm_jobman('initcfg');
+
+% Set max threads for implicit multithreading
+%lastNumThreads = maxNumCompThreads(nWorkers*2);
 
 % Subjects with no errors in pre-dartel
 inds = find([runStatus.status]);

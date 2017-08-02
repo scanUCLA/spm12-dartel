@@ -4,14 +4,14 @@
 % Instructions, agorithmic description & edit history (please read!!):
 %   https://github.com/scanUCLA/spm12-dartel
 
-% Last revision: 31 July 2017 - Kevin Tan
+% Last revision: 2 Aug 2017 - Kevin Tan
 %% User-editable Parameters
 
 % Path/directory/name information
-owd = '/u/project/sanscn/kevmtan/scripts/SPM12_DARTEL/spm12_dartel_1struct/endo2';  % base study directory
-codeDir = '/u/project/sanscn/kevmtan/scripts/SPM12_DARTEL/spm12_dartel_1struct'; % where code lives
-batchDir = '/u/project/sanscn/kevmtan/scripts/SPM12_DARTEL/spm12_dartel_1struct/endo2batch170731'; % dir in which to save batch scripts & predartel subject status + workspace
-subID = 'endo*'; % pattern for finding subject folders (use wildcards)
+owd = '/data/gratitude_mprage/data';  % base study directory
+codeDir = '/data/gratitude_mprage/preproc'; % where code lives
+batchDir = '/data/gratitude_mprage/preproc/batches'; % dir in which to save batch scripts & predartel subject status + workspace
+subID = 'grat*'; % pattern for finding subject folders (use wildcards)
 runID = 'BOLD_*'; % pattern for finding functional run folders (use wildcards)
 funcID ='BOLD_'; % first character(s) in your functional images? (do NOT use wildcards)
 structID = 'MBW_*'; % pattern for finding structural folder (use wildcards)
@@ -21,21 +21,24 @@ subNam = {}; % do which subjects? (leave empty to do all)
 skipSub = {}; % skip which subjects? (leave empty to do all)
 
 % 4d or 3d functional nifti files (e.g. BOLD runs all in one .nii or multiple .niis?)
-fourDnii = 0; % 1=4d, 0=3d
+fourDnii = 1; % 1=4d, 0=3d
 
 % Path of TPM tissues in your SPM directory
 tpmPath = '/u/project/CCN/apps/spm12/tpm';
 
 % Voxel size for resampling (use AFNI's dicom_hdr on the functional & structural DICOM files and use the "slice thickness")
 fVoxSize = [3 3 3]; % functionals (non-multiband usually [3 3 3], multiband usually [2 2 2])
-sVoxSize = [3 3 3]; % MPRAGE usually [1 1 1], MBW usually [1 1 3] or [3 3 3]
+sVoxSize = [1 1 1]; % MPRAGE usually [1 1 1]
 
 % smoothing kernel for functionals  (mm isotropic)
 FWHM = 8;
 
 % Execute (1) or just make matlabbatches (0)
-execPreDartel = 0;
-execDartel = 0;
+execPreDartel = 1;
+execDartel = 1;
+
+% Number of workers (threads) matlab should use
+nWorkers = 15; %maxNumCompThreads
 
 %% Setup subjects
 
@@ -67,10 +70,9 @@ runStatus(numSubs).error = [];
 %% Run Pre-dartel (explicitly parallelized per subject)
 
 % Determine number of parallel workers
-myCluster = parcluster('local');
-nWorkers = min(numSubs, myCluster.NumWorkers);
+parpool('local', nWorkers);
 
-pool = parpool('local', nWorkers);
+% Parfor loop to run explicity parallelized pre-dartel across subs
 parfor i = 1:numSubs
     % Pre-allocate subject in runStatus struct
     runStatus(i).subNam = subNam{i};
@@ -127,7 +129,7 @@ diary off
 diary([batchDir '/DARTEL_log_' datestr(now,'yyyymmdd_HHMM') '.txt']);
 
 % Set max threads for implicit multithreading
-lastNumThreads = maxNumCompThreads(myCluster.NumWorkers);
+%lastNumThreads = maxNumCompThreads(myCluster.NumWorkers);
 
 % Load SPM
 spm('defaults','fmri'); spm_jobman('initcfg');

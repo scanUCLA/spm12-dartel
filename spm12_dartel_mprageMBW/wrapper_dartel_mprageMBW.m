@@ -25,7 +25,7 @@ skipSub = {}; % skip which subjects? (leave empty to do all)
 fourDnii = 1; % 1=4d, 0=3d
 
 % Path of TPM tissues in your SPM directory
-tpmPath = '/home/kevin/Documents/MATLAB/spm12/tpm';
+tpmPath = '/u/project/CCN/apps/spm12/tpm';
 
 % Voxel size for resampling (use AFNI's dicom_hdr on the functional & structural DICOM files and use the "slice thickness")
 fVoxSize = [3 3 3]; % functionals (non-multiband usually [3 3 3], multiband usually [2 2 2])
@@ -72,6 +72,8 @@ runStatus(numSubs).error = [];
 
 % Determine number of parallel workers
 parpool('local', nWorkers);
+
+% Parfor loop to run explicity parallelized pre-dartel across subs
 parfor i = 1:numSubs
     % Pre-allocate subject in runStatus struct
     runStatus(i).subNam = subNam{i};

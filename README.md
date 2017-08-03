@@ -3,14 +3,13 @@
 Code for preprocessing of functional and structural MRI data into standardized MNI space using SPM12 and DARTEL. 
 
 * Can be used with only one structural scan (e.g. either T1 MPRAGE or T2 matched-bandwidth)
-* Can be used with two structural scans (e.g. T1 MPRAGE *and* T2 matched-bandwidth)
-** Secondary structural scan (e.g. MBW) used as intermediary for coregistering primary structural (e.g. MPRAGE) to functionals
+* Can be used with two structural scans (e.g. T1 MPRAGE *and* T2 matched-bandwidth). Secondary scan (e.g. MBW) used as intermediary for coregistering functionals to primary structural (e.g. MPRAGE)
 
 <b>Instructions:</b>
 
-Within each folder there is a <b>wrapper</b> script and a <b>run</b> function. All user-editable parameters are in an the epynomous section of the wrapper. Other sections of the wrapper script and run function shouldn't be edited unless you know what you're doing. Call only the wrapper as the wrapper will call the run function in a parfor loop.
-A "runStatus" struct containg each subject's pre-dartel status will be saved in the folder specified in "batchDir". The matlab workspace after pre-dartel will also be saved in "batchDir", you can use this to re-run DARTEL without re-running pre-dartel. 
-A text log of the matlab console output will be saved for predartel & dartel in the "batchDir" folder
+Call only the <b>wrapper</b> script as it will call the <b>run</b> function in a parfor loop. All user-editable parameters are in an the epynomous section of the wrapper. Other sections of the wrapper script and run function shouldn't be edited unless you know what you're doing.
+
+A "runStatus" struct containg each subject's pre-dartel status will be saved in the folder specified in "batchDir". The matlab workspace after pre-dartel will also be saved in "batchDir", you can use this to re-run DARTEL without re-running pre-dartel. A text log of the matlab console output will be saved for predartel & dartel in the "batchDir" folder. All pre-dartel and DARTEL matlabbatches will be saved in "batchDir"
 
 Final image ouputs for further analyses:
 * swrBOLD[run name].nii = resliced, warped-to-MNI & smoothed BOLD images

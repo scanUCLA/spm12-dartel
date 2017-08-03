@@ -7,7 +7,7 @@ Code for preprocessing of functional and structural MRI data into standardized M
 
 <b>Instructions:</b>
 
-Call only the <b>wrapper</b> script as it will call the <b>run</b> function in a parfor loop. All user-editable parameters are in an the epynomous section of the wrapper. Other sections of the wrapper script and run function shouldn't be edited unless you know what you're doing.
+Call only the <b>wrapper</b> script as it will call the <b>run</b> function in a parfor loop. All user-editable parameters are in the epynomous section of the wrapper. Other sections of the wrapper script and run function shouldn't be edited unless you know what you're doing.
 
 A "runStatus" struct containg each subject's pre-dartel status will be saved in the folder specified in "batchDir". The matlab workspace after pre-dartel will also be saved in "batchDir", you can use this to re-run DARTEL without re-running pre-dartel. A text log of the matlab console output will be saved for predartel & dartel in the "batchDir" folder. All pre-dartel and DARTEL matlabbatches will be saved in "batchDir"
 

@@ -1,4 +1,4 @@
-%% SPM12 Dartel using both MPRAGE & MBW
+%% SPM12 Dartel using just MPRAGE or both MPRAGE & MBW
 % Created by Kevin Tan on Jun 29, 2017 (some code adopted from Bob Spunt)
 
 % Instructions, agorithmic description & edit history (please read!!):
@@ -8,38 +8,47 @@
 %% User-editable Parameters
 
 % Path/directory/name information
-owd = '/data/gratitude_mprage/data';  % base study directory
-codeDir = '/data/gratitude_mprage/preproc'; % where code lives
-batchDir = '/data/gratitude_mprage/preproc/batches'; % dir in which to save batch scripts & predartel subject status + workspace
-subID = 'grat*'; % pattern for finding subject folders (use wildcards)
-runID = 'BOLD_*'; % pattern for finding functional run folders (use wildcards)
-funcID ='BOLD_'; % first character(s) in your functional images? (do NOT use wildcards)
-mbwdirID = 'Matched_Bandwidth_HiRes*'; % pattern for finding matched-bandwidth folder (use wildcards)
-mpragedirID = 'SAG_MPRAGE*'; % pattern for finding mprage folder (use wildcards)
+owd = '/u/project/sanscn/kevmtan/scripts/rawTestData/PTSD';  % base study directory
+codeDir = '/u/project/sanscn/kevmtan/scripts/SPM12_DARTEL'; % where code lives
+batchDir = '/u/project/sanscn/kevmtan/scripts/SPM12_DARTEL/PTSD_170802'; % dir in which to save batch scripts & predartel subject status + workspace
+
+% pattern for finding subject folders (use wildcards)
+subID = 'VET*';
 
 % Subjects to do/skip, example: {'sub001' 'sub002'}
 subNam = {}; % do which subjects? (leave empty to do all)
 skipSub = {}; % skip which subjects? (leave empty to do all)
 
-% 4d or 3d functional nifti files (e.g. BOLD runs all in one .nii or multiple .niis?)
-fourDnii = 1; % 1=4d, 0=3d
+% Funcitonal image info
+runID = 'BOLD_*'; % pattern for finding functional run folders (use wildcards)
+funcID ='BOLD_'; % first character(s) in your functional NIFTI files? (do NOT use wildcards)
+
+% Are you using 4D NIFTI functional files?
+fourDnii = true; % true=all run volumes in one NIFTI files, false=run volumes in separate NIFTI files
+
+% Structural image info (pattern for finding struct folders, assumes first characters of struct folder and struct filename are same)
+structID{1} = 'SAG_MPRAGE*'; % MPRAGE if you have it, MBW if no MPRAGE (use wildcards)
+structID{2} = 'Matched_Bandwidth_HiRes*'; % MBW if you have it in addition to MPRAGE (use wildcards)
+
+% Two structural scans or just one?
+twoStructs = true; % true = 2 structural scans, false = 1 strutural scan
 
 % Path of TPM tissues in your SPM directory
 tpmPath = '/u/project/CCN/apps/spm12/tpm';
 
 % Voxel size for resampling (use AFNI's dicom_hdr on the functional & structural DICOM files and use the "slice thickness")
 fVoxSize = [3 3 3]; % functionals (non-multiband usually [3 3 3], multiband usually [2 2 2])
-sVoxSize = [1 1 1]; % MPRAGE usually [1 1 1]
+sVoxSize = [1 1 1]; % for structID{1} (MPRAGE usually [1 1 1], MBW usually [3 3 3])
 
 % smoothing kernel for functionals  (mm isotropic)
 FWHM = 8;
 
-% Execute (1) or just make matlabbatches (0)
-execPreDartel = 1;
-execDartel = 1;
-
 % Number of workers (threads) matlab should use
-nWorkers = 15; %maxNumCompThreads
+nWorkers = maxNumCompThreads; % specify integer if desired
+
+% EXECUTE (1) or just make matlabbatches (0)
+execPreDartel = 0;
+execDartel = 0;
 
 %% Setup subjects
 
@@ -71,6 +80,7 @@ runStatus(numSubs).error = [];
 %% Run Pre-dartel (explicitly parallelized per subject)
 
 % Determine number of parallel workers
+nWorkers = min(numSubs, nWorkers);
 parpool('local', nWorkers);
 
 % Parfor loop to run explicity parallelized pre-dartel across subs
@@ -89,7 +99,7 @@ parfor i = 1:numSubs
         [runStatus(i).status, runStatus(i).error, allfuncs{i}, allt1{i}, allmt1{i},...
             allrc1{i}, allrc2{i}, allu_rc1{i}, allc1{i}, allc2{i}, allc3{i}] =...
             run_spm12dartel(subNam{i}, owd, codeDir, batchDir, runID, funcID,...
-            mbwdirID, mpragedirID, fourDnii, execPreDartel);
+            structID, twoStructs, fourDnii, execPreDartel);
         if runStatus(i).status == 1
             disp(['subject ' subNam{i} ' successful']);
         else
@@ -99,23 +109,6 @@ parfor i = 1:numSubs
     end
 end
 delete(gcp('nocreate'));
-
-% % Get rid of image frame specification for func images (SPM idiosyncrasy)
-% if fourDnii == 1
-%     for ia = 1:length(a_allfuncs)
-%         for ib = 1:length(a_allfuncs{ia})
-%             chars = length(a_allfuncs{ia}{ib}{1})-2;
-%             allfuncs{ia}{ib,1} = a_allfuncs{ia}{ib}{1}(1:chars);
-%         end
-%     end
-% else
-%     for ia = 1:length(a_allfuncs)
-%         for ib = 1:length(a_allfuncs{ia})
-%             chars = length(a_allfuncs{ia}{ib})-2;
-%             allfuncs{ia}{ib,1} = a_allfuncs{ia}{ib}(1:chars);
-%         end
-%     end
-% end
 
 % Save stuff
 date = datestr(now,'yyyymmdd_HHMM');

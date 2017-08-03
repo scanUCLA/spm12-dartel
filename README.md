@@ -2,8 +2,9 @@
 
 Code for preprocessing of functional and structural MRI data into standardized MNI space using SPM12 and DARTEL. 
 
-* Code in <b>/spm12_dartel_1struct</b> is for datasets that include only one structural scan (e.g. either T1 MPRAGE or T2 matched-bandwidth)
-* Code in <b>/spm12_dartel_mprageMBW</b> is for datasets that include two structural scans (e.g. T1 MPRAGE *and* T2 matched-bandwidth)
+* Can be used with only one structural scan (e.g. either T1 MPRAGE or T2 matched-bandwidth)
+* Can be used with two structural scans (e.g. T1 MPRAGE *and* T2 matched-bandwidth)
+** Secondary structural scan (e.g. MBW) used as intermediary for coregistering primary structural (e.g. MPRAGE) to functionals
 
 <b>Instructions:</b>
 
@@ -19,7 +20,7 @@ Final image ouputs for further analyses:
 * wc1[MPRAGE/structural name].nii = warped-to-MNI white matter segmentation image (can be used as mask/ROI; signal from which typically regressed out during functional connectivity analyses, etc)
 * wc1[MPRAGE/structural name].nii = warped-to-MNI cerebrospinal fluid (also eyes/sinuses maybe) segmentation image (can be used as mask/ROI; signal from which typically regressed out during functional connectivity analyses, etc)
 
-<b>1struct algorithm:</b>
+<b>Algorithm when using only one structural scan:</b>
 1) Realign & reslice functionals to mean functional (pre-dartel; parfor parallelization)
 2) Co-register structural to mean functional (pre-dartel; parfor parallelization)
 3) Segment & bias-correct structural, generate segment params for DARTEL  (pre-dartel; implicit multithreading from here)
@@ -31,7 +32,7 @@ Final image ouputs for further analyses:
 9) Normalize white matter (C2) segmentation to MNI space via DARTEL
 10) Normalize CSF (C3) segmentation to MNI space via DARTEL
 
-<b>mprageMBW algorithm:</b>
+<b>Algorithm when using MPRAGE & MBW:</b>
 1) Realign & reslice functionals to mean functional (pre-dartel; parfor parallelization)
 2) Co-register MBW to mean functional (pre-dartel; parfor parallelization)
 3) Co-register MPRAGE to MBW (pre-dartel; parfor parallelization)

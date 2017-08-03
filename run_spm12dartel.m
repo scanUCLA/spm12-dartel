@@ -1,10 +1,10 @@
 function [status, errorMsg, allfuncs, allt1, allmt1, allrc1, allrc2, allu_rc1, allc1, allc2, allc3] =...
-    run_spm12dartel(subNam, owd, codeDir, batchDir, runID, funcID, mbwdirID,...
-    mpragedirID, fourDnii, execPreDartel)
+    run_spm12dartel(subNam, owd, codeDir, batchDir, runID, funcID, structID,...
+    twoStructs, fourDnii, execPreDartel)
 
 % Last revision: 2 Aug 2017 - Kevin Tan
 
-%% Organize files for matlabbatch
+%% Find files for matlabbatch
 spm('defaults','fmri'); spm_jobman('initcfg');
 
 status = NaN;
@@ -21,7 +21,7 @@ allc3 = [];
 
 try
     % Find run directories
-    runDir = [owd '/' subNam '/raw/'];
+    runDir = [owd '/' subNam '/raw'];
     d = dir([owd '/' subNam '/raw/' runID]);
     nRuns = length(d);
     fprintf('Found %d runs\n', nRuns)
@@ -30,7 +30,6 @@ try
     % Fund functional images per run
     volsFPr = {};
     for r = 1:nRuns
-        vols = {};
         volsr = {};
         [vols, ~] = spm_select('ExtList', [runDir '/' d(r).name], tmpStr, Inf);
         vols = cellstr(strcat(vols));
@@ -47,25 +46,25 @@ try
         end  
     end
     
-    % find the mbw folder
-    d = dir([owd '/' subNam '/raw/' mbwdirID]);
-    mbwdir = [owd '/' subNam '/raw/' d(1).name];
-    
-    % find the mprage folder
-    d = dir([owd '/' subNam '/raw/' mpragedirID]);
-    mprdir = [owd '/' subNam '/raw/' d(1).name];
-    
-    % get the images
-    d = dir([mbwdir '/' mbwdirID '.nii']);
-    mbw_name = d.name; clear d
-    d = dir([mprdir '/' mpragedirID '.nii']);
-    mprage_name = d.name; clear d
-    mbw = [mbwdir filesep mbw_name];
+    % Get primary struct image
+    d = dir([runDir '/' structID{1}]);
+    mprdir = [runDir '/' d(1).name];
+    d = dir([mprdir '/' structID{1} '.nii']);
+    mprage_name = d(1).name;
     allt1 = [mprdir filesep mprage_name];
-    fprintf('MBW is: %s\n',mbw)
-    fprintf('MPRAGE is: %s\n\n',allt1)
+    fprintf('Primary structural: %s\n\n',allt1)
     
-    % for DARTEL
+    if twoStructs
+        % Get secondary struct image
+        d = dir([runDir '/' structID{2}]);
+        mbwdir = [runDir '/' d(1).name];
+        d = dir([mbwdir '/' structID{2} '.nii']);
+        mbw_name = d(1).name;
+        mbw = [mbwdir filesep mbw_name];
+        fprintf('Secondary structural: %s\n',mbw)
+    end
+    
+    % Get file paths for DARTEL
     allfuncs = volsFPr;
     allmt1 = [mprdir filesep 'm' mprage_name];
     allrc1 = [mprdir filesep 'rc1' mprage_name(1:end-4) '.nii'];
@@ -76,7 +75,7 @@ try
     allc3 = [mprdir filesep 'c3' mprage_name];
 catch
     status = 0;
-    errorMsg = 'Error making matlabbatch';
+    errorMsg = 'Error finding files for matlabbatch';
     disp([errorMsg ' for ' subNam]);
     cd(codeDir);
     return
@@ -105,23 +104,35 @@ try
     matlabbatch{2}.spm.spatial.realign.estwrite.roptions.mask   = 1;            % enable masking (default)
     matlabbatch{2}.spm.spatial.realign.estwrite.roptions.prefix = 'r';
     
-    % Coregister MBW to mean functional
-    matlabbatch{3}.spm.spatial.coreg.estimate.ref(1) = cfg_dep('Realign: Estimate & Reslice: Mean Image', substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','rmean'));
-    matlabbatch{3}.spm.spatial.coreg.estimate.source = cellstr(mbw);
-    matlabbatch{3}.spm.spatial.coreg.estimate.other{1} = '';
-    matlabbatch{3}.spm.spatial.coreg.estimate.eoptions.cost_fun = 'nmi';
-    matlabbatch{3}.spm.spatial.coreg.estimate.eoptions.sep = [4 2];
-    matlabbatch{3}.spm.spatial.coreg.estimate.eoptions.tol = [0.02 0.02 0.02 0.001 0.001 0.001 0.01 0.01 0.01 0.001 0.001 0.001];
-    matlabbatch{3}.spm.spatial.coreg.estimate.eoptions.fwhm = [7 7];
-    
-    % Coregister MPRAGE to MBW
-    matlabbatch{4}.spm.spatial.coreg.estimate.ref = cellstr(mbw);
-    matlabbatch{4}.spm.spatial.coreg.estimate.source = cellstr(allt1);
-    matlabbatch{4}.spm.spatial.coreg.estimate.other{1} = '';
-    matlabbatch{4}.spm.spatial.coreg.estimate.eoptions.cost_fun = 'nmi';
-    matlabbatch{4}.spm.spatial.coreg.estimate.eoptions.sep = [4 2];
-    matlabbatch{4}.spm.spatial.coreg.estimate.eoptions.tol = [0.02 0.02 0.02 0.001 0.001 0.001 0.01 0.01 0.01 0.001 0.001 0.001];
-    matlabbatch{4}.spm.spatial.coreg.estimate.eoptions.fwhm = [7 7];
+    if twoStructs % 2 structural scans 
+        % Coregister MBW to mean functional (as intermediary)
+        matlabbatch{3}.spm.spatial.coreg.estimate.ref(1) = cfg_dep('Realign: Estimate & Reslice: Mean Image', substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','rmean'));
+        matlabbatch{3}.spm.spatial.coreg.estimate.source = cellstr(mbw);
+        matlabbatch{3}.spm.spatial.coreg.estimate.other{1} = '';
+        matlabbatch{3}.spm.spatial.coreg.estimate.eoptions.cost_fun = 'nmi';
+        matlabbatch{3}.spm.spatial.coreg.estimate.eoptions.sep = [4 2];
+        matlabbatch{3}.spm.spatial.coreg.estimate.eoptions.tol = [0.02 0.02 0.02 0.001 0.001 0.001 0.01 0.01 0.01 0.001 0.001 0.001];
+        matlabbatch{3}.spm.spatial.coreg.estimate.eoptions.fwhm = [7 7];
+        
+        % Coregister MPRAGE to MBW
+        matlabbatch{4}.spm.spatial.coreg.estimate.ref = cellstr(mbw);
+        matlabbatch{4}.spm.spatial.coreg.estimate.source = cellstr(allt1);
+        matlabbatch{4}.spm.spatial.coreg.estimate.other{1} = '';
+        matlabbatch{4}.spm.spatial.coreg.estimate.eoptions.cost_fun = 'nmi';
+        matlabbatch{4}.spm.spatial.coreg.estimate.eoptions.sep = [4 2];
+        matlabbatch{4}.spm.spatial.coreg.estimate.eoptions.tol = [0.02 0.02 0.02 0.001 0.001 0.001 0.01 0.01 0.01 0.001 0.001 0.001];
+        matlabbatch{4}.spm.spatial.coreg.estimate.eoptions.fwhm = [7 7];
+        
+    else % 1 structural scan
+        % Coregister struct to mean functional
+        matlabbatch{3}.spm.spatial.coreg.estimate.ref(1) = cfg_dep('Realign: Estimate & Reslice: Mean Image', substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','rmean'));
+        matlabbatch{3}.spm.spatial.coreg.estimate.source = cellstr(allt1);
+        matlabbatch{3}.spm.spatial.coreg.estimate.other{1} = '';
+        matlabbatch{3}.spm.spatial.coreg.estimate.eoptions.cost_fun = 'nmi';
+        matlabbatch{3}.spm.spatial.coreg.estimate.eoptions.sep = [4 2];
+        matlabbatch{3}.spm.spatial.coreg.estimate.eoptions.tol = [0.02 0.02 0.02 0.001 0.001 0.001 0.01 0.01 0.01 0.001 0.001 0.001];
+        matlabbatch{3}.spm.spatial.coreg.estimate.eoptions.fwhm = [7 7];
+    end
     
 catch
     status = 0;
@@ -134,7 +145,7 @@ end
 %% Save matlabbatch
 try
     time_stamp = datestr(now, 'yyyymmdd_HHMM');
-    filename = [batchDir '/preDARTEL_MBWmprage_' subNam '_' time_stamp];
+    filename = [batchDir '/preDARTEL_' subNam '_' time_stamp];
     save(filename, 'matlabbatch');
 catch
     status = 0;

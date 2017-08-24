@@ -4,7 +4,7 @@
 % Instructions, agorithmic description & edit history (please read!!):
 %   https://github.com/scanUCLA/spm12-dartel
 
-% Last revision: 2 Aug 2017 - Kevin Tan
+% Last revision: 23 Aug 2017 - Kevin Tan
 %% User-editable Parameters
 
 % Path/directory/name information
@@ -135,7 +135,7 @@ inds = find([runStatus.status]);
 for s = 1:length(inds)
     matlabbatch{1}.spm.spatial.preproc.channel.vols{s,1} = allt1{inds(s)};
 end
-matlabbatch{1}.spm.spatial.preproc.channel.biasreg = 0.0001;
+matlabbatch{1}.spm.spatial.preproc.channel.biasreg = 0.001;
 matlabbatch{1}.spm.spatial.preproc.channel.biasfwhm = 60;
 matlabbatch{1}.spm.spatial.preproc.channel.write = [0 1];
 matlabbatch{1}.spm.spatial.preproc.tissue(1).tpm = cellstr([tpmPath '/TPM.nii,1']);

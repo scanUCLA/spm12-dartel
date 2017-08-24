@@ -2,7 +2,7 @@ function [status, errorMsg, allfuncs, allt1, allmt1, allrc1, allrc2, allu_rc1, a
     run_spm12dartel(subNam, owd, codeDir, batchDir, runID, funcID, structID,...
     twoStructs, fourDnii, execPreDartel)
 
-% Last revision: 2 Aug 2017 - Kevin Tan
+% Last revision: 23 Aug 2017 - Kevin Tan
 
 %% Find files for matlabbatch
 spm('defaults','fmri'); spm_jobman('initcfg');

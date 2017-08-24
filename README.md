@@ -12,12 +12,14 @@ Call only the <b>wrapper</b> script as it will call the <b>run</b> function in a
 A "runStatus" struct containg each subject's pre-dartel status will be saved in the folder specified in "batchDir". The matlab workspace after pre-dartel will also be saved in "batchDir", you can use this to re-run DARTEL without re-running pre-dartel. A text log of the matlab console output will be saved for predartel & dartel in the "batchDir" folder. All pre-dartel and DARTEL matlabbatches will be saved in "batchDir"
 
 Final image ouputs for further analyses:
-* swrBOLD[run name].nii = resliced, warped-to-MNI & smoothed BOLD images
+* rBOLD[run name].nii = resliced, native-space BOLD images (e.g. native-space single-subject analyeses)
+* wrBOLD[run name].nii = resliced, MNI-space & unsmoothed BOLD images (e.g. connectivity or MVPA analyses)
+* swrBOLD[run name].nii = resliced, MNI-space & smoothed BOLD images (e.g. normal group-level analyeses)
 * rp_BOLD[run name].nii = motion parameters to include in level1 model as nuisance regressors
-* wm[MPRAGE/structural name].nii = bias-corrected warped-to-MNI structural image
-* wc1[MPRAGE/structural name].nii = warped-to-MNI grey matter segmentation image (can be used as mask/ROI; signal from which typically used for functional connectivity analyses, etc)
-* wc1[MPRAGE/structural name].nii = warped-to-MNI white matter segmentation image (can be used as mask/ROI; signal from which typically regressed out during functional connectivity analyses, etc)
-* wc1[MPRAGE/structural name].nii = warped-to-MNI cerebrospinal fluid (also eyes/sinuses maybe) segmentation image (can be used as mask/ROI; signal from which typically regressed out during functional connectivity analyses, etc)
+* wm[MPRAGE/structural name].nii = bias-corrected MNI-space structural image
+* wc1[MPRAGE/structural name].nii = MNI-space grey matter segmentation image (can be used as mask/ROI; signal from which typically used for functional connectivity analyses, etc)
+* wc2[MPRAGE/structural name].nii = MNI-space white matter segmentation image (can be used as mask/ROI; signal from which typically regressed out during functional connectivity analyses, etc)
+* wc3[MPRAGE/structural name].nii = MNI-space cerebrospinal fluid (also eyes/sinuses maybe) segmentation image (can be used as mask/ROI; signal from which typically regressed out during functional connectivity analyses, etc)
 
 <b>Algorithm when using only one structural scan:</b>
 1) Realign & reslice functionals to mean functional (pre-dartel; parfor parallelization)

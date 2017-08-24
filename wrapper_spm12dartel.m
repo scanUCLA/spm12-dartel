@@ -205,7 +205,7 @@ matlabbatch{2}.spm.tools.dartel.warp.settings.optim.lmreg = 0.01;
 matlabbatch{2}.spm.tools.dartel.warp.settings.optim.cyc = 3;
 matlabbatch{2}.spm.tools.dartel.warp.settings.optim.its = 3;
 
-% DARTEL: normalize functional images to MNI
+% DARTEL: normalize & smooth functional images to MNI
 matlabbatch{3}.spm.tools.dartel.mni_norm.template(1) = cfg_dep('Run Dartel (create Templates): Template (Iteration 6)', substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','template', '()',{7}));
 for s = 1:length(inds)
     matlabbatch{3}.spm.tools.dartel.mni_norm.data.subj(s).flowfield{1} = allu_rc1{inds(s)};
@@ -259,6 +259,17 @@ matlabbatch{7}.spm.tools.dartel.mni_norm.vox = sVoxSize;
 matlabbatch{7}.spm.tools.dartel.mni_norm.bb = [NaN NaN NaN; NaN NaN NaN];
 matlabbatch{7}.spm.tools.dartel.mni_norm.preserve = 0;
 matlabbatch{7}.spm.tools.dartel.mni_norm.fwhm = [0 0 0];
+
+% DARTEL: normalize functional images to MNI no smoothing
+matlabbatch{8}.spm.tools.dartel.mni_norm.template(1) = cfg_dep('Run Dartel (create Templates): Template (Iteration 6)', substruct('.','val', '{}',{2}, '.','val', '{}',{1}, '.','val', '{}',{1}, '.','val', '{}',{1}), substruct('.','template', '()',{7}));
+for s = 1:length(inds)
+    matlabbatch{8}.spm.tools.dartel.mni_norm.data.subj(s).flowfield{1} = allu_rc1{inds(s)};
+    matlabbatch{8}.spm.tools.dartel.mni_norm.data.subj(s).images = allfuncs{inds(s)};
+end                                             
+matlabbatch{8}.spm.tools.dartel.mni_norm.vox = fVoxSize;
+matlabbatch{8}.spm.tools.dartel.mni_norm.bb = [NaN NaN NaN; NaN NaN NaN];
+matlabbatch{8}.spm.tools.dartel.mni_norm.preserve = 0;
+matlabbatch{8}.spm.tools.dartel.mni_norm.fwhm = [0 0 0];
 
 %% Save & run DARTEL matlabbatch
 
